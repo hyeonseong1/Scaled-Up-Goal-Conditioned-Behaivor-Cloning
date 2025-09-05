@@ -4,7 +4,7 @@ This repository is ongoing.
 
 [Install]
 ```commandline
-pip install -e requirements.txt
+pip install -r requirements.txt
 ```
 
 [command]
