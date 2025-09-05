@@ -103,7 +103,7 @@ python main.py --env_name=pointmaze-teleport-stitch-v0 --eval_episodes=50 --agen
 python main.py --env_name=pointmaze-teleport-stitch-v0 --eval_episodes=50 --agent=agents/hiql.py --agent.actor_p_randomgoal=0.5 --agent.actor_p_trajgoal=0.5 --agent.high_alpha=3.0 --agent.low_alpha=3.0
 
 # antmaze-medium-navigate-v0 (GCBC)
-python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py
+python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 # antmaze-medium-navigate-v0 (GCIVL)
 python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcivl.py --agent.alpha=10.0
 # antmaze-medium-navigate-v0 (GCIQL)

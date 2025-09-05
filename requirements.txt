@@ -6,3 +6,4 @@ ml_collections
 matplotlib
 moviepy
 wandb
+pandas
