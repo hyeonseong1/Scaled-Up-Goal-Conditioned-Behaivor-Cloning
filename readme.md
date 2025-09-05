@@ -10,8 +10,8 @@ pip install -r requirements.txt
 [Command]    
 Train and eval
 ```commandline
-python main.py --env_name=antmaze-medium-navigate-v0 --eval_episode=50 --agent=agents/gcbc.py --seed 0
-python main.py --env_name=antmaze-medium-navigate-v0 --eval_episode=50 --agent=agents/gcbcV2.py --seed 0 
+python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
+python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbcV2.py --seed 0 
 ```
 
 Plot performance
