@@ -2,7 +2,8 @@
 
 This repository is ongoing.
 
-[Install]
+[Install]    
+Recommend python=3.10.x   
 ```commandline
 pip install -r requirements.txt
 ```
