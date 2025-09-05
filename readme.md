@@ -20,3 +20,11 @@ plot performance
 python plott.py --env medium --algo gcbc
 python plott.py --env medium --algo gcbcV2
 ```
+
+[Results]
+
+Results are saved at eval.csv.    
+ex) exp/Debug/{antmaze-medium-gcbcV2-sd000}/eval.csv
+
+
+Or see the comprehesive results on wandb. (recommended)
