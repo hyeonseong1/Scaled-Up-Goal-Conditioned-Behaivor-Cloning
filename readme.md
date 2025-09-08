@@ -1,32 +1,33 @@
-### Scaled Up Goal Conditioned Behavior Cloning! 
+# Scaled Up Goal Conditioned Behavior Cloning! 
 
 This repository is ongoing.
 
-[Install]    
+## [Install]    
 Recommend python=3.10.x   
 ```commandline
 pip install -r requirements.txt
 ```
 
-[Command]    
-Run full tests    
+## [Command]    
+### Run full tests    
 ```commandline
 sh run.sh
 ```
 
-Run individual tests example   
+### Run individual tests example   
 ```commandline
 python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbcV2.py --seed 0 
 ```
+It takes no more than 1 hour with RTX 3080.  
 
-Plot performance
+### Plot performance
 ```commandline
 python plott.py --env medium --algo gcbc
 python plott.py --env medium --algo gcbcV2
 ```
 
-[Results]    
+## [Results]    
 Results are saved at eval.csv.    
 ex) exp/Debug/antmaze-medium-gcbcV2-sd000/eval.csv
 
