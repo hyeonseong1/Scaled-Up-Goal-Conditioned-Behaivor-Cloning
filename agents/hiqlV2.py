@@ -15,7 +15,12 @@ from agents.simbaV2_network import (
     SimbaV2DoubleValue,      # (v1, v2) 밸류
 )
 
-class HIQLAgent(flax.struct.PyTreeNode):
+import math
+
+from utils.networks import Identity
+
+
+class HIQLAgentV2(flax.struct.PyTreeNode):
     """Hierarchical implicit Q-learning (HIQL) agent."""
 
     rng: Any
@@ -350,7 +355,7 @@ def get_config():
     config = ml_collections.ConfigDict(
         dict(
             # Agent hyperparameters.
-            agent_name='hiql',  # Agent name.
+            agent_name='hiqlV2',  # Agent name.
             lr=3e-4,  # Learning rate.
             batch_size=1024,  # Batch size.
             actor_hidden_dims=(512, 512, 512),  # Actor network hidden dimensions.
@@ -382,11 +387,11 @@ def get_config():
             frame_stack=ml_collections.config_dict.placeholder(int),  # Number of frames to stack.
             simba2_num_blocks=4,
             simba2_hidden_dim=256,
-            simba2_scaler_init=1.0,
-            simba2_scaler_scale=1.0,
-            simba2_alpha_init=0.5,
-            simba2_alpha_scale=1.0,
-            simba2_c_shift=0.0,
+            simba2_scaler_init=2.0 / math.sqrt(256),
+            simba2_scaler_scale=2.0 / math.sqrt(256),
+            simba2_alpha_init=1 / (1 + 1),
+            simba2_alpha_scale=1.0 / math.sqrt(256),
+            simba2_c_shift=3.0,
             simba2_num_bins=51,
             simba2_min_v=-10.0,
             simba2_max_v=10.0,

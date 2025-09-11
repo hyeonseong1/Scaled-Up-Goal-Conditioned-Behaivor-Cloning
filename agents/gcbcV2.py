@@ -1,3 +1,4 @@
+import math
 from typing import Any
 
 import flax
@@ -198,8 +199,8 @@ def get_config():
     config = ml_collections.ConfigDict(
         dict(
             # Agent hyperparameters.
-            agent_name='gcbc',  # Agent name.
-            lr=3e-4,  # Learning rate.
+            agent_name='gcbcV2',  # Agent name.
+            lr=1e-4,  # Learning rate.
             batch_size=1024,  # Batch size.
             actor_hidden_dims=(512, 512, 512),  # (discrete 전용) 기존 GCActor용
             discount=0.99,  # (미사용) GCDataset 옵션 호환
@@ -221,13 +222,13 @@ def get_config():
             frame_stack=ml_collections.config_dict.placeholder(int),
 
             # ⬇️ SimbaV2 하이퍼파라미터 (continuous 전용)
-            simba2_num_blocks=4,
+            simba2_num_blocks=1,
             simba2_hidden_dim=256,
-            simba2_scaler_init=1.0,
-            simba2_scaler_scale=1.0,
-            simba2_alpha_init=0.5,
-            simba2_alpha_scale=1.0,
-            simba2_c_shift=0.0,
+            simba2_scaler_init=2.0/math.sqrt(256),
+            simba2_scaler_scale=2.0/math.sqrt(256),
+            simba2_alpha_init=1/(1+1),
+            simba2_alpha_scale=1.0/math.sqrt(256),
+            simba2_c_shift=3.0,
         )
     )
     return config
