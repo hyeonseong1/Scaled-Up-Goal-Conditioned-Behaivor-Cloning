@@ -1,16 +1,63 @@
 from typing import Any
 
 import flax
+import flax.linen as nn
 import jax
 import jax.numpy as jnp
 import ml_collections
 import optax
 from utils.encoders import GCEncoder, encoder_modules
 from utils.flax_utils import ModuleDict, TrainState, nonpytree_field
-from utils.modified_networks import GCActor, GCDiscreteActor
+from utils.networks import GCDiscreteActor  # discrete는 그대로 유지
+
+# ⬇️ SimbaV2 액터 사용
+from agents.simbaV2_network import SimbaV2Actor
+
+# ---- (새) Goal-conditioned Simba actor wrapper ----
+class SimbaGCActor(nn.Module):
+    """
+    기존 GCActor처럼 (obs, goals)를 받아 내부에서 [s; g]를 구성해 SimbaV2Actor에 전달.
+    optional gc_encoder가 있으면 그걸로 전처리 후 전달.
+    """
+    # SimbaV2 하이퍼파라미터
+    num_blocks: int
+    hidden_dim: int
+    action_dim: int
+    scaler_init: float
+    scaler_scale: float
+    alpha_init: float
+    alpha_scale: float
+    c_shift: float
+    # optional encoder (GCEncoder)
+    gc_encoder: Any = None
+
+    def setup(self):
+        self.actor = SimbaV2Actor(
+            num_blocks=self.num_blocks,
+            hidden_dim=self.hidden_dim,
+            action_dim=self.action_dim,
+            scaler_init=self.scaler_init,
+            scaler_scale=self.scaler_scale,
+            alpha_init=self.alpha_init,
+            alpha_scale=self.alpha_scale,
+            c_shift=self.c_shift,
+        )
+        # gc_encoder가 Module이면 플랙스가 자동으로 서브모듈로 등록함
+        self.encoder = self.gc_encoder
+
+    def __call__(self, observations, goals, temperature: float = 1.0):
+        if self.encoder is not None:
+            # GCEncoder는 (state_encoder/concat_encoder) 조합을 내부에서 처리
+            x = self.encoder(observations, goals)
+        else:
+            x = jnp.concatenate([observations, goals], axis=-1)
+
+        # SimbaV2Actor는 (dist, info)를 반환 -> 기존 인터페이스와 맞추기 위해 dist만 돌려줌
+        dist, _ = self.actor(x, temperature=temperature)
+        return dist
 
 
-class GCBCAgent(flax.struct.PyTreeNode):
+class GCBCAgentV2(flax.struct.PyTreeNode):
     """Goal-conditioned behavioral cloning (GCBC) agent."""
 
     rng: Any
@@ -29,10 +76,13 @@ class GCBCAgent(flax.struct.PyTreeNode):
             'bc_log_prob': log_prob.mean(),
         }
         if not self.config['discrete']:
+            # ⚠️ TransformedDistribution 대비: mode/scale_diag 대신 mean/stddev 사용
+            pred_mean = dist.mean()
+            pred_std = dist.stddev()
             actor_info.update(
                 {
-                    'mse': jnp.mean((dist.mode() - batch['actions']) ** 2),
-                    'std': jnp.mean(dist.scale_diag),
+                    'mse': jnp.mean((pred_mean - batch['actions']) ** 2),
+                    'std': jnp.mean(pred_std),
                 }
             )
 
@@ -104,13 +154,13 @@ class GCBCAgent(flax.struct.PyTreeNode):
         else:
             action_dim = ex_actions.shape[-1]
 
-        # Define encoder.
+        # (선택) 비전 인코더 설정
         encoders = dict()
         if config['encoder'] is not None:
             encoder_module = encoder_modules[config['encoder']]
             encoders['actor'] = GCEncoder(concat_encoder=encoder_module())
 
-        # Define actor network.
+        # Actor: discrete는 기존, continuous는 SimbaV2 백본
         if config['discrete']:
             actor_def = GCDiscreteActor(
                 hidden_dims=config['actor_hidden_dims'],
@@ -118,11 +168,15 @@ class GCBCAgent(flax.struct.PyTreeNode):
                 gc_encoder=encoders.get('actor'),
             )
         else:
-            actor_def = GCActor(
-                hidden_dims=config['actor_hidden_dims'],
+            actor_def = SimbaGCActor(
+                num_blocks=config['simba2_num_blocks'],
+                hidden_dim=config['simba2_hidden_dim'],
                 action_dim=action_dim,
-                state_dependent_std=False,
-                const_std=config['const_std'],
+                scaler_init=config['simba2_scaler_init'],
+                scaler_scale=config['simba2_scaler_scale'],
+                alpha_init=config['simba2_alpha_init'],
+                alpha_scale=config['simba2_alpha_scale'],
+                c_shift=config['simba2_c_shift'],
                 gc_encoder=encoders.get('actor'),
             )
 
@@ -147,24 +201,33 @@ def get_config():
             agent_name='gcbc',  # Agent name.
             lr=3e-4,  # Learning rate.
             batch_size=1024,  # Batch size.
-            actor_hidden_dims=(512, 512, 512),  # Actor network hidden dimensions.
-            discount=0.99,  # Discount factor (unused by default; can be used for geometric goal sampling in GCDataset).
-            const_std=True,  # Whether to use constant standard deviation for the actor.
+            actor_hidden_dims=(512, 512, 512),  # (discrete 전용) 기존 GCActor용
+            discount=0.99,  # (미사용) GCDataset 옵션 호환
+            const_std=True,  # (discrete 무관) 기존 필드 유지
             discrete=False,  # Whether the action space is discrete.
             encoder=ml_collections.config_dict.placeholder(str),  # Visual encoder name (None, 'impala_small', etc.).
             # Dataset hyperparameters.
-            dataset_class='GCDataset',  # Dataset class name.
-            value_p_curgoal=0.0,  # Unused (defined for compatibility with GCDataset).
-            value_p_trajgoal=1.0,  # Unused (defined for compatibility with GCDataset).
-            value_p_randomgoal=0.0,  # Unused (defined for compatibility with GCDataset).
-            value_geom_sample=False,  # Unused (defined for compatibility with GCDataset).
-            actor_p_curgoal=0.0,  # Probability of using the current state as the actor goal.
-            actor_p_trajgoal=1.0,  # Probability of using a future state in the same trajectory as the actor goal.
-            actor_p_randomgoal=0.0,  # Probability of using a random state as the actor goal.
-            actor_geom_sample=False,  # Whether to use geometric sampling for future actor goals.
-            gc_negative=True,  # Unused (defined for compatibility with GCDataset).
-            p_aug=0.0,  # Probability of applying image augmentation.
-            frame_stack=ml_collections.config_dict.placeholder(int),  # Number of frames to stack.
+            dataset_class='GCDataset',
+            value_p_curgoal=0.0,
+            value_p_trajgoal=1.0,
+            value_p_randomgoal=0.0,
+            value_geom_sample=False,
+            actor_p_curgoal=0.0,
+            actor_p_trajgoal=1.0,
+            actor_p_randomgoal=0.0,
+            actor_geom_sample=False,
+            gc_negative=True,
+            p_aug=0.0,
+            frame_stack=ml_collections.config_dict.placeholder(int),
+
+            # ⬇️ SimbaV2 하이퍼파라미터 (continuous 전용)
+            simba2_num_blocks=4,
+            simba2_hidden_dim=256,
+            simba2_scaler_init=1.0,
+            simba2_scaler_scale=1.0,
+            simba2_alpha_init=0.5,
+            simba2_alpha_scale=1.0,
+            simba2_c_shift=0.0,
         )
     )
     return config

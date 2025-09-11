@@ -63,7 +63,7 @@ def main(_):
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(f'plots/{exp_name}')
-    plt.show()
+    # plt.show()
 
 if __name__ == "__main__":
     app.run(main)

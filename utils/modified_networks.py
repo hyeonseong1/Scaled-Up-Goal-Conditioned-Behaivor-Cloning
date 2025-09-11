@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 
 from agents.simbaV2_layer import HyperEmbedder, HyperLERPBlock, \
-    HyperCategoricalValue
+    HyperCategoricalValue, HyperNormalTanhPolicy
 
 
 def default_init(scale=1.0):
@@ -148,35 +148,46 @@ class GCActor(nn.Module):
     """Goal-conditioned actor.
 
     Attributes:
-        hidden_dims: Hidden layer dimensions.
-        action_dim: Action dimension.
-        log_std_min: Minimum value of log standard deviation.
-        log_std_max: Maximum value of log standard deviation.
-        tanh_squash: Whether to squash the action with tanh.
-        state_dependent_std: Whether to use state-dependent standard deviation.
-        const_std: Whether to use constant standard deviation.
-        final_fc_init_scale: Initial scale of the final fully-connected layer.
-        gc_encoder: Optional GCEncoder module to encode the inputs.
+        TODO: Check attributes
     """
 
+    num_blocks: int
     hidden_dims: Sequence[int]
     action_dim: int
-    log_std_min: Optional[float] = -5
-    log_std_max: Optional[float] = 2
-    tanh_squash: bool = False
-    state_dependent_std: bool = False
-    const_std: bool = True
-    final_fc_init_scale: float = 1e-2
+    scaler_init: float
+    scaler_scale: float
+    alpha_init: float
+    alpha_scale: float
+    c_shift: float
     gc_encoder: nn.Module = None
 
     def setup(self):
-        self.actor_net = MLP(self.hidden_dims, activate_final=True)
-        self.mean_net = nn.Dense(self.action_dim, kernel_init=default_init(self.final_fc_init_scale))
-        if self.state_dependent_std:
-            self.log_std_net = nn.Dense(self.action_dim, kernel_init=default_init(self.final_fc_init_scale))
-        else:
-            if not self.const_std:
-                self.log_stds = self.param('log_stds', nn.initializers.zeros, (self.action_dim,))
+        hidden_dim = self.hidden_dims[0]
+        self.embedder = HyperEmbedder(
+            hidden_dim=hidden_dim,
+            scaler_init=self.scaler_init,
+            scaler_scale=self.scaler_scale,
+            c_shift=self.c_shift,
+        )
+        self.encoder = nn.Sequential(
+            [
+                HyperLERPBlock(
+                    hidden_dim=hidden_dim,
+                    scaler_init=self.scaler_init,
+                    scaler_scale=self.scaler_scale,
+                    alpha_init=self.alpha_init,
+                    alpha_scale=self.alpha_scale,
+                )
+                for _ in range(self.num_blocks)
+            ]
+        )
+        self.predictor = HyperNormalTanhPolicy(
+            hidden_dim=hidden_dim,
+            action_dim=self.action_dim,
+            scaler_init=1.0,
+            scaler_scale=1.0,
+        )
+
 
     def __call__(
         self,
@@ -200,24 +211,11 @@ class GCActor(nn.Module):
             if goals is not None:
                 inputs.append(goals)
             inputs = jnp.concatenate(inputs, axis=-1)
-        outputs = self.actor_net(inputs)
+        intermediate_output1 = self.embedder(inputs)
+        intermediate_output2 = self.encoder(intermediate_output1)
+        dist, _ = self.predictor(intermediate_output2, temperature)
 
-        means = self.mean_net(outputs)
-        if self.state_dependent_std:
-            log_stds = self.log_std_net(outputs)
-        else:
-            if self.const_std:
-                log_stds = jnp.zeros_like(means)
-            else:
-                log_stds = self.log_stds
-
-        log_stds = jnp.clip(log_stds, self.log_std_min, self.log_std_max)
-
-        distribution = distrax.MultivariateNormalDiag(loc=means, scale_diag=jnp.exp(log_stds) * temperature)
-        if self.tanh_squash:
-            distribution = TransformedWithMode(distribution, distrax.Block(distrax.Tanh(), ndims=1))
-
-        return distribution
+        return dist
 
 
 class GCDiscreteActor(nn.Module):
@@ -335,9 +333,9 @@ class GCValue(nn.Module):
         if actions is not None:
             inputs.append(actions)
         inputs = jnp.concatenate(inputs, axis=-1)
+
         raw_output = self.embedder(inputs)
         encoded_output = self.encoder(raw_output)
-
         v, _ = self.predictor(encoded_output)
 
         return v

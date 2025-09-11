@@ -116,7 +116,7 @@ python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=
 python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/hiql.py --agent.high_alpha=3.0 --agent.low_alpha=3.0
 
 # antmaze-large-navigate-v0 (GCBC)
-python main.py --env_name=antmaze-large-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py
+python main.py --env_name=antmaze-large-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 # antmaze-large-navigate-v0 (GCIVL)
 python main.py --env_name=antmaze-large-navigate-v0 --eval_episodes=50 --agent=agents/gcivl.py --agent.alpha=10.0
 # antmaze-large-navigate-v0 (GCIQL)
@@ -129,7 +129,7 @@ python main.py --env_name=antmaze-large-navigate-v0 --eval_episodes=50 --agent=a
 python main.py --env_name=antmaze-large-navigate-v0 --eval_episodes=50 --agent=agents/hiql.py --agent.high_alpha=3.0 --agent.low_alpha=3.0
 
 # antmaze-giant-navigate-v0 (GCBC)
-python main.py --env_name=antmaze-giant-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py
+python main.py --env_name=antmaze-giant-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 # antmaze-giant-navigate-v0 (GCIVL)
 python main.py --env_name=antmaze-giant-navigate-v0 --eval_episodes=50 --agent=agents/gcivl.py --agent.alpha=10.0 --agent.discount=0.995
 # antmaze-giant-navigate-v0 (GCIQL)
@@ -207,7 +207,7 @@ python main.py --env_name=antmaze-teleport-stitch-v0 --eval_episodes=50 --agent=
 python main.py --env_name=antmaze-teleport-stitch-v0 --eval_episodes=50 --agent=agents/hiql.py --agent.actor_p_randomgoal=0.5 --agent.actor_p_trajgoal=0.5 --agent.high_alpha=3.0 --agent.low_alpha=3.0
 
 # antmaze-medium-explore-v0 (GCBC)
-python main.py --env_name=antmaze-medium-explore-v0 --eval_episodes=50 --agent=agents/gcbc.py
+python main.py --env_name=antmaze-medium-explore-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 # antmaze-medium-explore-v0 (GCIVL)
 python main.py --env_name=antmaze-medium-explore-v0 --eval_episodes=50 --agent=agents/gcivl.py --agent.actor_p_randomgoal=1.0 --agent.actor_p_trajgoal=0.0 --agent.alpha=10.0
 # antmaze-medium-explore-v0 (GCIQL)
@@ -220,7 +220,7 @@ python main.py --env_name=antmaze-medium-explore-v0 --eval_episodes=50 --agent=a
 python main.py --env_name=antmaze-medium-explore-v0 --eval_episodes=50 --agent=agents/hiql.py --agent.actor_p_randomgoal=1.0 --agent.actor_p_trajgoal=0.0 --agent.high_alpha=10.0 --agent.low_alpha=10.0
 
 # antmaze-large-explore-v0 (GCBC)
-python main.py --env_name=antmaze-large-explore-v0 --eval_episodes=50 --agent=agents/gcbc.py
+python main.py --env_name=antmaze-large-explore-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 # antmaze-large-explore-v0 (GCIVL)
 python main.py --env_name=antmaze-large-explore-v0 --eval_episodes=50 --agent=agents/gcivl.py --agent.actor_p_randomgoal=1.0 --agent.actor_p_trajgoal=0.0 --agent.alpha=10.0
 # antmaze-large-explore-v0 (GCIQL)
@@ -233,7 +233,7 @@ python main.py --env_name=antmaze-large-explore-v0 --eval_episodes=50 --agent=ag
 python main.py --env_name=antmaze-large-explore-v0 --eval_episodes=50 --agent=agents/hiql.py --agent.actor_p_randomgoal=1.0 --agent.actor_p_trajgoal=0.0 --agent.high_alpha=10.0 --agent.low_alpha=10.0
 
 # antmaze-teleport-explore-v0 (GCBC)
-python main.py --env_name=antmaze-teleport-explore-v0 --eval_episodes=50 --agent=agents/gcbc.py
+python main.py --env_name=antmaze-teleport-explore-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 # antmaze-teleport-explore-v0 (GCIVL)
 python main.py --env_name=antmaze-teleport-explore-v0 --eval_episodes=50 --agent=agents/gcivl.py --agent.actor_p_randomgoal=1.0 --agent.actor_p_trajgoal=0.0 --agent.alpha=10.0
 # antmaze-teleport-explore-v0 (GCIQL)

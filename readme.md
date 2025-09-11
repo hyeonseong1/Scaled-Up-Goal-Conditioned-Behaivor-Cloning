@@ -4,25 +4,25 @@ This repository is ongoing.
 
 ## [Install]    
 Recommend python=3.10.x   
-```commandline
+```bash
 pip install -r requirements.txt
 ```
 
 ## [Command]    
 ### Run full tests    
-```commandline
+```bash
 sh run.sh
 ```
 
 ### Run individual tests example   
-```commandline
+```bash
 python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbc.py --seed 0
 python main.py --env_name=antmaze-medium-navigate-v0 --eval_episodes=50 --agent=agents/gcbcV2.py --seed 0 
 ```
 It takes no more than 1 hour with RTX 3080.  
 
 ### Plot performance
-```commandline
+```bash
 python plott.py --env medium --algo gcbc
 python plott.py --env medium --algo gcbcV2
 ```

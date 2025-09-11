@@ -165,7 +165,7 @@ class HyperNormalTanhPolicy(nn.Module):
         )
 
         # tanh(N(mu, sigma))
-        dist = tfd.TransformedDistribution(distribution=dist, bijector=tfb.Tanh())
+        # dist = tfd.TransformedDistribution(distribution=dist, bijector=tfb.Tanh())
 
         info = {}
         return dist, info
