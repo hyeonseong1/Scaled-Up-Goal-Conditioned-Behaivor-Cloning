@@ -45,7 +45,7 @@ def main(_):
     # Set up logger.
     # exp_name = get_exp_name(FLAGS.seed)
     exp_name = _get_exp_name(FLAGS.seed, FLAGS.env_name, FLAGS['agent'])
-    setup_wandb(project='OGBench', group=FLAGS.run_group, name=exp_name)
+    setup_wandb(project='Offline-RL', group=FLAGS.run_group, name=exp_name)
 
     FLAGS.save_dir = os.path.join(FLAGS.save_dir, wandb.run.project, FLAGS.run_group, exp_name)
     os.makedirs(FLAGS.save_dir, exist_ok=True)

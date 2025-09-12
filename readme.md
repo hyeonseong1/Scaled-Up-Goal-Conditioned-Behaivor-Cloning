@@ -23,8 +23,8 @@ It takes no more than 1 hour with RTX 3080.
 
 ### Plot performance
 ```bash
-python plott.py --env medium --algo gcbc
-python plott.py --env medium --algo gcbcV2
+python load_and_plot.py --env medium --algo gcbc
+python load_and_plot.py --env medium --algo gcbcV2
 ```
 
 ## [Results]    
