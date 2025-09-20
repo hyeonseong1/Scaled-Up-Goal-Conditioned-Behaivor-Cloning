@@ -35,7 +35,7 @@ ex) exp/Debug/antmaze-medium-gcbcV2-sd000/eval.csv
 
 Or see the comprehesive results on wandb. (recommended)
 
-### Inspiration
+## [Inspiration]
 This repository was highly inspired by the following GitHub projects.
 1. https://github.com/seohongpark/ogbench
 2. https://github.com/dojeon-ai/SimbaV2
