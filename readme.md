@@ -1,6 +1,7 @@
 # Scaled Up Goal Conditioned Behavior Cloning! 
 
 This repository is ongoing.
+Preparing a paper to submit.
 
 ## [Install]    
 Recommend python=3.10.x   
@@ -33,3 +34,8 @@ ex) exp/Debug/antmaze-medium-gcbcV2-sd000/eval.csv
 
 
 Or see the comprehesive results on wandb. (recommended)
+
+### Inspiration
+This repository was highly inspired by the following GitHub projects.
+1. https://github.com/seohongpark/ogbench
+2. https://github.com/dojeon-ai/SimbaV2
